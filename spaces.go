@@ -7,10 +7,10 @@ import (
 
 func (s *Service) GetSpace() (string, error) {
 	requestUrl := s.BaseUrl + "/api/v2/space"
-	requestParams := url.Values{}
-	requestParams.Add("apiKey", s.Config.ApiKey)
+	urlParams := url.Values{}
+	urlParams.Add("apiKey", s.Config.ApiKey)
 
-	res, err := s.client.Get(requestUrl + "?" + requestParams.Encode())
+	res, err := s.client.Get(requestUrl + "?" + urlParams.Encode())
 	if err != nil {
 		return "", err
 	}
@@ -29,10 +29,10 @@ func (s *Service) GetSpace() (string, error) {
 
 func (s *Service) GetSpaceNotification() (string, error) {
 	requestUrl := s.BaseUrl + "/api/v2/space/notification"
-	requestParams := url.Values{}
-	requestParams.Add("apiKey", s.Config.ApiKey)
+	urlParams := url.Values{}
+	urlParams.Add("apiKey", s.Config.ApiKey)
 
-	res, err := s.client.Get(requestUrl + "?" + requestParams.Encode())
+	res, err := s.client.Get(requestUrl + "?" + urlParams.Encode())
 	if err != nil {
 		return "", err
 	}
@@ -46,6 +46,6 @@ func (s *Service) GetSpaceNotification() (string, error) {
 	return string(body), nil
 }
 
-// func (s *Service) PutSpaceNotification() (string, error) {}
+// func (s *Service) UpdateSpaceNotification() (string, error) {}
 // func (s *Service) GutSpaceDiskUsage() (string, error) {}
-// func (s *Service) PostSpaceAttachment(file *File) (string, error) {}
+// func (s *Service) PostAttachmentFile(file *File) (string, error) {}

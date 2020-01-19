@@ -5,12 +5,17 @@ import (
 	"net/url"
 )
 
-func (s *Service) GetNotifications() (string, error) {
-	requestUrl := s.BaseUrl + "/api/v2/notifications"
-	requestParams := url.Values{}
-	requestParams.Add("apiKey", s.Config.ApiKey)
+type CountNotificationQuery struct {
+	AlreadyRead         bool // default: false
+	ResourceAlreadyRead bool // default: false
+}
 
-	res, err := s.client.Get(requestUrl + "?" + requestParams.Encode())
+func (s *Service) GetNotification() (string, error) {
+	requestUrl := s.BaseUrl + "/api/v2/notifications"
+	urlParams := url.Values{}
+	urlParams.Add("apiKey", s.Config.ApiKey)
+
+	res, err := s.client.Get(requestUrl + "?" + urlParams.Encode())
 	if err != nil {
 		return "", err
 	}
@@ -24,24 +29,24 @@ func (s *Service) GetNotifications() (string, error) {
 	return string(body), nil
 }
 
-func (s *Service) GetNotificationsCount(alreadyRead bool, resourceAlreadyRead bool) (string, error) {
+func (s *Service) CountNotification(query CountNotificationQuery) (string, error) {
 	requestUrl := s.BaseUrl + "/api/v2/notifications/count"
-	requestParams := url.Values{}
-	requestParams.Add("apiKey", s.Config.ApiKey)
+	urlParams := url.Values{}
+	urlParams.Add("apiKey", s.Config.ApiKey)
 
 	// add params
-	if alreadyRead {
-		requestParams.Add("alreadyRead", "true")
+	if query.AlreadyRead {
+		urlParams.Add("alreadyRead", "true")
 	} else {
-		requestParams.Add("alreadyRead", "false")
+		urlParams.Add("alreadyRead", "false")
 	}
-	if resourceAlreadyRead {
-		requestParams.Add("resourceAlreadyRead", "true")
+	if query.ResourceAlreadyRead {
+		urlParams.Add("resourceAlreadyRead", "true")
 	} else {
-		requestParams.Add("resourceAlreadyRead", "false")
+		urlParams.Add("resourceAlreadyRead", "false")
 	}
 
-	res, err := s.client.Get(requestUrl + "?" + requestParams.Encode())
+	res, err := s.client.Get(requestUrl + "?" + urlParams.Encode())
 	if err != nil {
 		return "", err
 	}
@@ -55,12 +60,12 @@ func (s *Service) GetNotificationsCount(alreadyRead bool, resourceAlreadyRead bo
 	return string(body), nil
 }
 
-func (s *Service) PostNotificationsMarkAsRead() (string, error) {
+func (s *Service) ResetUnreadNotificationCount() (string, error) {
 	requestUrl := s.BaseUrl + "/api/v2/notifications/markAsRead"
-	requestParams := url.Values{}
-	requestParams.Add("apiKey", s.Config.ApiKey)
+	urlParams := url.Values{}
+	urlParams.Add("apiKey", s.Config.ApiKey)
 
-	res, err := s.client.Post(requestUrl+"?"+requestParams.Encode(), "application/json", nil)
+	res, err := s.client.Post(requestUrl+"?"+urlParams.Encode(), "application/json", nil)
 	if err != nil {
 		return "", err
 	}
@@ -73,3 +78,23 @@ func (s *Service) PostNotificationsMarkAsRead() (string, error) {
 
 	return string(body), nil
 }
+
+/*
+func (s *Service) ReadNotification(id uint) (string, error) {
+	requestUrl := s.BaseUrl + "/api/v2/notifications/" + string(id) + "/markAsRead"
+	urlParams := url.Values{}
+	urlParams.Add("apiKey", s.Config.ApiKey)
+
+	res, err := s.client.Post(requestUrl+"?"+urlParams.Encode(), "application/json", nil)
+	if err != nil {
+		return "", err
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return string(body), nil
+}*/

@@ -1,7 +1,7 @@
 go-backlog
 ====
 
-go library for backlog api.
+go library for backlog api.  
 https://developer.nulab-inc.com/ja/docs/backlog/
 
 ## Installation
@@ -25,6 +25,7 @@ func main() {
 	config := backlog.Configure{
 		SpaceId: "Enter SpaceId",
 		ApiKey:  "Enter ApiKey",
+        Domain:  backlog.DomainJp,
 	}
 	client, err := backlog.NewClient(config, http.DefaultClient)
 	if err != nil {
