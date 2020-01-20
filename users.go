@@ -6,8 +6,10 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"io/ioutil"
+	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 type User struct {
@@ -56,8 +58,33 @@ func (s *Service) GetUser(userId int) (string, error) {
 	return string(body), nil
 }
 
-// func (s *Service) AddUser(userId string, password string, name string, mailAddress string, roleType int) (string, error) {}
-/*
+func (s *Service) AddUser(user User) (string, error) {
+	requestUrl := s.BaseUrl + "/api/v2/users"
+	urlParams := url.Values{}
+	urlParams.Add("apiKey", s.Config.ApiKey)
+
+	// add params
+	requestParams := url.Values{}
+	requestParams.Add("userId", user.UserId)
+	requestParams.Add("password", user.Password)
+	requestParams.Add("name", user.Name)
+	requestParams.Add("mailAddress", user.MailAddress)
+	requestParams.Add("roleType", strconv.Itoa(user.RoleType))
+
+	res, err := http.Post(requestUrl+"?"+urlParams.Encode(), "application/x-www-form-urlencoded", strings.NewReader(requestParams.Encode()))
+	if err != nil {
+		return "", err
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return string(body), nil
+}
+
 func (s *Service) UpdateUser(userId int, user User) (string, error) {
 	requestUrl := s.BaseUrl + "/api/v2/users/" + strconv.Itoa(userId)
 	urlParams := url.Values{}
@@ -78,13 +105,13 @@ func (s *Service) UpdateUser(userId int, user User) (string, error) {
 		requestParams.Add("roleType", strconv.Itoa(user.RoleType))
 	}
 
-	res, err := http.NewRequest(http.MethodPatch, requestUrl+"?"+urlParams.Encode(), strings.NewReader(requestParams.Encode()))
+	req, err := http.NewRequest(http.MethodPatch, requestUrl+"?"+urlParams.Encode(), strings.NewReader(requestParams.Encode()))
 	if err != nil {
 		return "", err
 	}
 
-	res.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	_, err = s.client.Do(res)
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	res, err := s.client.Do(req)
 	if err != nil {
 		return "", err
 	}
@@ -94,13 +121,33 @@ func (s *Service) UpdateUser(userId int, user User) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Printf("test: %v", string(body))
-	time.Sleep(5 * time.Second)
 
 	return string(body), nil
-}*/
+}
 
-// func (s *Service) DeleteUser(userId int) (string, error) {}
+func (s *Service) DeleteUser(userId int) (string, error) {
+	requestUrl := s.BaseUrl + "/api/v2/users/" + strconv.Itoa(userId)
+	urlParams := url.Values{}
+	urlParams.Add("apiKey", s.Config.ApiKey)
+
+	req, err := http.NewRequest(http.MethodDelete, requestUrl+"?"+urlParams.Encode(), nil)
+	if err != nil {
+		return "", err
+	}
+
+	res, err := s.client.Do(req)
+	if err != nil {
+		return "", err
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return string(body), nil
+}
 
 func (s *Service) GetOwnUser() (string, error) {
 	requestUrl := s.BaseUrl + "/api/v2/users/myself"
