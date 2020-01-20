@@ -34,7 +34,6 @@ func (s *Service) CountNotification(query CountNotificationQuery) (string, error
 	urlParams := url.Values{}
 	urlParams.Add("apiKey", s.Config.ApiKey)
 
-	// add params
 	if query.AlreadyRead {
 		urlParams.Add("alreadyRead", "true")
 	} else {

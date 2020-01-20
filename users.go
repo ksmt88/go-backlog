@@ -63,7 +63,6 @@ func (s *Service) AddUser(user User) (string, error) {
 	urlParams := url.Values{}
 	urlParams.Add("apiKey", s.Config.ApiKey)
 
-	// add params
 	requestParams := url.Values{}
 	requestParams.Add("userId", user.UserId)
 	requestParams.Add("password", user.Password)
@@ -90,20 +89,11 @@ func (s *Service) UpdateUser(userId int, user User) (string, error) {
 	urlParams := url.Values{}
 	urlParams.Add("apiKey", s.Config.ApiKey)
 
-	// add params
 	requestParams := url.Values{}
-	if user.Password != "" {
-		requestParams.Add("password", user.Password)
-	}
-	if user.Name != "" {
-		requestParams.Add("name", user.Name)
-	}
-	if user.MailAddress != "" {
-		requestParams.Add("mailAddress", user.MailAddress)
-	}
-	if user.RoleType != 0 {
-		requestParams.Add("roleType", strconv.Itoa(user.RoleType))
-	}
+	requestParams.Add("password", user.Password)
+	requestParams.Add("name", user.Name)
+	requestParams.Add("mailAddress", user.MailAddress)
+	requestParams.Add("roleType", strconv.Itoa(user.RoleType))
 
 	req, err := http.NewRequest(http.MethodPatch, requestUrl+"?"+urlParams.Encode(), strings.NewReader(requestParams.Encode()))
 	if err != nil {
