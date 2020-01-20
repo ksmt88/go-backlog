@@ -25,7 +25,7 @@ func main() {
 	config := backlog.Configure{
 		SpaceId: "Enter SpaceId",
 		ApiKey:  "Enter ApiKey",
-        Domain:  backlog.DomainJp,
+		Domain:  backlog.DomainJp,
 	}
 	client, err := backlog.NewClient(config, http.DefaultClient)
 	if err != nil {
