@@ -3,6 +3,7 @@ package backlog
 import (
 	"io/ioutil"
 	"net/url"
+	"strconv"
 )
 
 type CountNotificationQuery struct {
@@ -78,9 +79,8 @@ func (s *Service) ResetUnreadNotificationCount() (string, error) {
 	return string(body), nil
 }
 
-/*
-func (s *Service) ReadNotification(id uint) (string, error) {
-	requestUrl := s.BaseUrl + "/api/v2/notifications/" + string(id) + "/markAsRead"
+func (s *Service) ReadNotification(id int) (string, error) {
+	requestUrl := s.BaseUrl + "/api/v2/notifications/" + strconv.Itoa(id) + "/markAsRead"
 	urlParams := url.Values{}
 	urlParams.Add("apiKey", s.Config.ApiKey)
 
@@ -96,4 +96,4 @@ func (s *Service) ReadNotification(id uint) (string, error) {
 	}
 
 	return string(body), nil
-}*/
+}

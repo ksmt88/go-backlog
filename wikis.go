@@ -11,9 +11,13 @@ import (
 	"strings"
 )
 
-type WikiListQuery struct {
+type GetWikiPageListQuery struct {
 	ProjectIdOrKey int
 	Keyword        string
+}
+
+type WikiPageQuery struct {
+	ProjectIdOrKey int
 }
 
 type Wiki struct {
@@ -23,7 +27,7 @@ type Wiki struct {
 	MailNotify bool
 }
 
-func (s *Service) GetWikiPageList(query WikiListQuery) (string, error) {
+func (s *Service) GetWikiPageList(query GetWikiPageListQuery) (string, error) {
 	requestUrl := s.BaseUrl + "/api/v2/wikis"
 	urlParams := url.Values{}
 	urlParams.Add("apiKey", s.Config.ApiKey)
@@ -45,7 +49,7 @@ func (s *Service) GetWikiPageList(query WikiListQuery) (string, error) {
 	return string(body), nil
 }
 
-func (s *Service) CountWikiPage(query WikiListQuery) (string, error) {
+func (s *Service) CountWikiPage(query WikiPageQuery) (string, error) {
 	requestUrl := s.BaseUrl + "/api/v2/wikis/count"
 	urlParams := url.Values{}
 	urlParams.Add("apiKey", s.Config.ApiKey)
@@ -66,7 +70,7 @@ func (s *Service) CountWikiPage(query WikiListQuery) (string, error) {
 	return string(body), nil
 }
 
-func (s *Service) GetWikiPageTagList(query WikiListQuery) (string, error) {
+func (s *Service) GetWikiPageTagList(query WikiPageQuery) (string, error) {
 	requestUrl := s.BaseUrl + "/api/v2/wikis/tags"
 	urlParams := url.Values{}
 	urlParams.Add("apiKey", s.Config.ApiKey)
