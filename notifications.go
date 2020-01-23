@@ -1,9 +1,11 @@
 package backlog
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/url"
 	"strconv"
+	"time"
 )
 
 type CountNotificationQuery struct {
@@ -11,26 +13,98 @@ type CountNotificationQuery struct {
 	ResourceAlreadyRead bool // default: false
 }
 
-func (s *Service) GetNotification() (string, error) {
+type Notification struct {
+	ID                  int     `json:"id"`
+	AlreadyRead         bool    `json:"alreadyRead"`
+	Reason              int     `json:"reason"`
+	ResourceAlreadyRead bool    `json:"resourceAlreadyRead"`
+	Project             Project `json:"project"`
+	Issue               struct {
+		ID        int    `json:"id"`
+		ProjectID int    `json:"projectId"`
+		IssueKey  string `json:"issueKey"`
+		KeyID     int    `json:"keyId"`
+		IssueType struct {
+			ID           int    `json:"id"`
+			ProjectID    int    `json:"projectId"`
+			Name         string `json:"name"`
+			Color        string `json:"color"`
+			DisplayOrder int    `json:"displayOrder"`
+		} `json:"issueType"`
+		Summary     string      `json:"summary"`
+		Description string      `json:"description"`
+		Resolutions interface{} `json:"resolutions"`
+		Priority    struct {
+			ID   int    `json:"id"`
+			Name string `json:"name"`
+		} `json:"priority"`
+		Status struct {
+			ID           int    `json:"id"`
+			ProjectID    int    `json:"projectId"`
+			Name         string `json:"name"`
+			Color        string `json:"color"`
+			DisplayOrder int    `json:"displayOrder"`
+		} `json:"status"`
+		Assignee       User          `json:"assignee"`
+		Category       []interface{} `json:"category"`
+		Versions       []interface{} `json:"versions"`
+		Milestone      []interface{} `json:"milestone"`
+		StartDate      time.Time     `json:"startDate"`
+		DueDate        time.Time     `json:"dueDate"`
+		EstimatedHours interface{}   `json:"estimatedHours"`
+		ActualHours    interface{}   `json:"actualHours"`
+		ParentIssueID  interface{}   `json:"parentIssueId"`
+		CreatedUser    User          `json:"createdUser"`
+		Created        time.Time     `json:"created"`
+		UpdatedUser    User          `json:"updatedUser"`
+		Updated        time.Time     `json:"updated"`
+		CustomFields   []interface{} `json:"customFields"`
+		Attachments    []Attachment  `json:"attachments"`
+		SharedFiles    []SharedFile  `json:"sharedFiles"`
+		Stars          []interface{} `json:"stars"`
+	} `json:"issue"`
+	Comment struct {
+		ID            int           `json:"id"`
+		Content       string        `json:"content"`
+		ChangeLog     interface{}   `json:"changeLog"`
+		CreatedUser   User          `json:"createdUser"`
+		Created       time.Time     `json:"created"`
+		Updated       time.Time     `json:"updated"`
+		Stars         []interface{} `json:"stars"`
+		Notifications []interface{} `json:"notifications"`
+	} `json:"comment"`
+	PullRequest        interface{} `json:"pullRequest"`
+	PullRequestComment interface{} `json:"pullRequestComment"`
+	Sender             User        `json:"sender"`
+	Created            time.Time   `json:"created"`
+}
+
+func (s *Service) GetNotification() ([]Notification, error) {
 	requestUrl := s.BaseUrl + "/api/v2/notifications"
 	urlParams := url.Values{}
 	urlParams.Add("apiKey", s.Config.ApiKey)
 
 	res, err := s.client.Get(requestUrl + "?" + urlParams.Encode())
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return string(body), nil
+	var notifications []Notification
+	err = json.Unmarshal(body, &notifications)
+	if err != nil {
+		return nil, err
+	}
+
+	return notifications, nil
 }
 
-func (s *Service) CountNotification(query CountNotificationQuery) (string, error) {
+func (s *Service) CountNotification(query CountNotificationQuery) (int, error) {
 	requestUrl := s.BaseUrl + "/api/v2/notifications/count"
 	urlParams := url.Values{}
 	urlParams.Add("apiKey", s.Config.ApiKey)
@@ -48,52 +122,68 @@ func (s *Service) CountNotification(query CountNotificationQuery) (string, error
 
 	res, err := s.client.Get(requestUrl + "?" + urlParams.Encode())
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 
-	return string(body), nil
+	var count struct {
+		Count int
+	}
+	err = json.Unmarshal(body, &count)
+	if err != nil {
+		return 0, err
+	}
+
+	return count.Count, nil
 }
 
-func (s *Service) ResetUnreadNotificationCount() (string, error) {
+func (s *Service) ResetUnreadNotificationCount() (int, error) {
 	requestUrl := s.BaseUrl + "/api/v2/notifications/markAsRead"
 	urlParams := url.Values{}
 	urlParams.Add("apiKey", s.Config.ApiKey)
 
 	res, err := s.client.Post(requestUrl+"?"+urlParams.Encode(), "application/json", nil)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 
-	return string(body), nil
+	var count struct {
+		Count int
+	}
+	err = json.Unmarshal(body, &count)
+	if err != nil {
+		return 0, err
+	}
+
+	return count.Count, nil
 }
 
-func (s *Service) ReadNotification(id int) (string, error) {
+func (s *Service) ReadNotification(id int) (bool, error) {
 	requestUrl := s.BaseUrl + "/api/v2/notifications/" + strconv.Itoa(id) + "/markAsRead"
 	urlParams := url.Values{}
 	urlParams.Add("apiKey", s.Config.ApiKey)
 
 	res, err := s.client.Post(requestUrl+"?"+urlParams.Encode(), "application/json", nil)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
+	_, err = ioutil.ReadAll(res.Body)
 	if err != nil {
-		return "", err
+		return false, err
 	}
 
-	return string(body), nil
+	return true, nil
 }
