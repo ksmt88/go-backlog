@@ -15,6 +15,7 @@ type Project struct {
 	ProjectLeaderCanEditProjectLeader bool   `json:"projectLeaderCanEditProjectLeader"`
 	TextFormattingRule                string `json:"textFormattingRule"`
 	Archived                          bool   `json:"archived"`
+	DisplayOrder                      int    `json:"displayOrder"`
 }
 
 func (s *Service) GetProjectList() ([]Project, error) {

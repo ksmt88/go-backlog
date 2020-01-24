@@ -19,6 +19,45 @@ type Space struct {
 	Updated            time.Time `json:"updated"`
 }
 
+type GetRecentUpdatesQuery struct {
+	ActivityTypeId []int
+	minId          int
+	maxId          int
+	count          int
+	order          string
+}
+
+type RecentUpdate struct {
+	ID      int     `json:"id"`
+	Project Project `json:"project"`
+	Type    int     `json:"type"`
+	Content struct {
+		ID          int    `json:"id"`
+		KeyID       int    `json:"key_id"`
+		Summary     string `json:"summary"`
+		Description string `json:"description"`
+		Comment     struct {
+			ID      int    `json:"id"`
+			Content string `json:"content"`
+		} `json:"comment"`
+		Changes []struct {
+			Field    string `json:"field"`
+			NewValue string `json:"new_value"`
+			OldValue string `json:"old_value"`
+			Type     string `json:"type"`
+		} `json:"changes"`
+	} `json:"content"`
+	Notifications []struct {
+		ID                  int  `json:"id"`
+		AlreadyRead         bool `json:"alreadyRead"`
+		Reason              int  `json:"reason"`
+		User                User `json:"user"`
+		ResourceAlreadyRead bool `json:"resourceAlreadyRead"`
+	} `json:"notifications"`
+	CreatedUser User      `json:"createdUser"`
+	Created     time.Time `json:"created"`
+}
+
 type SpaceNotification struct {
 	Content string    `json:"content"`
 	Updated time.Time `json:"updated"`
@@ -50,8 +89,39 @@ func (s *Service) GetSpace() (Space, error) {
 	return space, nil
 }
 
-// func (s *Service) GetSpaceActivities() (string, error) {}
-// func (s *Service) GetSpaceImage() (*File, error) {}
+/*func (s *Service) GetRecentUpdates(query GetRecentUpdatesQuery) ([]RecentUpdate, error) {
+	requestUrl := s.BaseUrl + "/api/v2/space/activities"
+	urlParams := url.Values{}
+	urlParams.Add("apiKey", s.Config.ApiKey)
+	for _, typeId := range query.ActivityTypeId {
+		urlParams.Add("activityTypeId[]", strconv.Itoa(typeId))
+	}
+	urlParams.Add("minId", strconv.Itoa(query.minId))
+	urlParams.Add("maxId", strconv.Itoa(query.maxId))
+	urlParams.Add("count", strconv.Itoa(query.count))
+	urlParams.Add("order", query.order)
+
+	res, err := s.client.Get(requestUrl + "?" + urlParams.Encode())
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var recentUpdates []RecentUpdate
+	err = json.Unmarshal(body, &recentUpdates)
+	if err != nil {
+		return nil, err
+	}
+
+	return recentUpdates, nil
+}*/
+
+// func (s *Service) GetSpaceLogo() (image, error) {}
 
 func (s *Service) GetSpaceNotification() (SpaceNotification, error) {
 	requestUrl := s.BaseUrl + "/api/v2/space/notification"
