@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/url"
+	"strconv"
 	"time"
 )
 
@@ -89,7 +90,7 @@ func (s *Service) GetSpace() (Space, error) {
 	return space, nil
 }
 
-/*func (s *Service) GetRecentUpdates(query GetRecentUpdatesQuery) ([]RecentUpdate, error) {
+func (s *Service) GetRecentUpdates(query GetRecentUpdatesQuery) ([]RecentUpdate, error) {
 	requestUrl := s.BaseUrl + "/api/v2/space/activities"
 	urlParams := url.Values{}
 	urlParams.Add("apiKey", s.Config.ApiKey)
@@ -119,7 +120,7 @@ func (s *Service) GetSpace() (Space, error) {
 	}
 
 	return recentUpdates, nil
-}*/
+}
 
 // func (s *Service) GetSpaceLogo() (image, error) {}
 

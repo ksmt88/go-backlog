@@ -1,6 +1,10 @@
 package backlog
 
 import (
+	"encoding/json"
+	"io/ioutil"
+	"net/url"
+	"strconv"
 	"time"
 )
 
@@ -107,12 +111,70 @@ type Issue struct {
 	} `json:"stars"`
 }
 
-/*func (s *Service) GetIssueList(query GetIssueListQuery) ([]Issue, error) {
+func (s *Service) GetIssueList(query GetIssueListQuery) ([]Issue, error) {
 	requestUrl := s.BaseUrl + "/api/v2/issues"
 	urlParams := url.Values{}
 	urlParams.Add("apiKey", s.Config.ApiKey)
-	urlParams.Add("projectId[]", "27927")
-	urlParams.Add("projectId[]", "88348")
+	for _, projectId := range query.ProjectId {
+		urlParams.Add("projectId[]", strconv.Itoa(projectId))
+	}
+	for _, issueTypeId := range query.IssueTypeId {
+		urlParams.Add("issueTypeId[]", strconv.Itoa(issueTypeId))
+	}
+	for _, categoryId := range query.CategoryId {
+		urlParams.Add("categoryId[]", strconv.Itoa(categoryId))
+	}
+	for _, versionId := range query.VersionId {
+		urlParams.Add("versionId[]", strconv.Itoa(versionId))
+	}
+	for _, milestoneId := range query.MilestoneId {
+		urlParams.Add("milestoneId[]", strconv.Itoa(milestoneId))
+	}
+	for _, statusId := range query.StatusId {
+		urlParams.Add("statusId[]", strconv.Itoa(statusId))
+	}
+	for _, priorityId := range query.PriorityId {
+		urlParams.Add("priorityId[]", strconv.Itoa(priorityId))
+	}
+	for _, assigneeId := range query.AssigneeId {
+		urlParams.Add("assigneeId[]", strconv.Itoa(assigneeId))
+	}
+	for _, createdUserId := range query.CreatedUserId {
+		urlParams.Add("createdUserId[]", strconv.Itoa(createdUserId))
+	}
+	for _, resolutionId := range query.ResolutionId {
+		urlParams.Add("resolutionId[]", strconv.Itoa(resolutionId))
+	}
+	urlParams.Add("parentChild", strconv.Itoa(query.ParentChild))
+	if query.Attachment {
+		urlParams.Add("attachment", "true")
+	} else {
+		urlParams.Add("attachment", "false")
+	}
+	if query.SharedFile {
+		urlParams.Add("sharedFile", "true")
+	} else {
+		urlParams.Add("sharedFile", "false")
+	}
+	urlParams.Add("sort", query.Sort)
+	urlParams.Add("order", query.Order)
+	urlParams.Add("offset", strconv.Itoa(query.Offset))
+	urlParams.Add("count", strconv.Itoa(query.Count))
+	urlParams.Add("createdSince", query.CreatedSince)
+	urlParams.Add("createdUntil", query.CreatedUntil)
+	urlParams.Add("updatedSince", query.UpdatedSince)
+	urlParams.Add("updatedUntil", query.UpdatedUntil)
+	urlParams.Add("startDateSince", query.StartDateSince)
+	urlParams.Add("startDateUntil", query.StartDateUntil)
+	urlParams.Add("dueDateSince", query.DueDateSince)
+	urlParams.Add("dueDateUntil", query.DueDateUntil)
+	for _, id := range query.Id {
+		urlParams.Add("id[]", strconv.Itoa(id))
+	}
+	for _, parentIssueId := range query.ParentIssueId {
+		urlParams.Add("parentIssueId[]", strconv.Itoa(parentIssueId))
+	}
+	urlParams.Add("keyword", query.Keyword)
 
 	res, err := s.client.Get(requestUrl + "?" + urlParams.Encode())
 	if err != nil {
@@ -132,4 +194,4 @@ type Issue struct {
 	}
 
 	return issues, nil
-}*/
+}
