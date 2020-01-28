@@ -2,10 +2,12 @@ package backlog
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/url"
 	"strconv"
 	"time"
+	"unsafe"
 )
 
 type CountNotificationQuery struct {
@@ -98,7 +100,7 @@ func (s *Service) GetNotification() ([]Notification, error) {
 	var notifications []Notification
 	err = json.Unmarshal(body, &notifications)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(*(*string)(unsafe.Pointer(&body)))
 	}
 
 	return notifications, nil
@@ -136,7 +138,7 @@ func (s *Service) CountNotification(query CountNotificationQuery) (int, error) {
 	}
 	err = json.Unmarshal(body, &count)
 	if err != nil {
-		return 0, err
+		return 0, errors.New(*(*string)(unsafe.Pointer(&body)))
 	}
 
 	return count.Count, nil
@@ -163,7 +165,7 @@ func (s *Service) ResetUnreadNotificationCount() (int, error) {
 	}
 	err = json.Unmarshal(body, &count)
 	if err != nil {
-		return 0, err
+		return 0, errors.New(*(*string)(unsafe.Pointer(&body)))
 	}
 
 	return count.Count, nil

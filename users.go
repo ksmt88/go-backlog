@@ -2,6 +2,7 @@ package backlog
 
 import (
 	"encoding/json"
+	"errors"
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"
@@ -11,6 +12,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"unsafe"
 )
 
 type User struct {
@@ -42,7 +44,7 @@ func (s *Service) GetUserList() ([]User, error) {
 	var users []User
 	err = json.Unmarshal(body, &users)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(*(*string)(unsafe.Pointer(&body)))
 	}
 
 	return users, nil
@@ -68,7 +70,7 @@ func (s *Service) GetUser(userId int) (User, error) {
 
 	err = json.Unmarshal(body, &user)
 	if err != nil {
-		return user, err
+		return user, errors.New(*(*string)(unsafe.Pointer(&body)))
 	}
 
 	return user, nil
@@ -101,7 +103,7 @@ func (s *Service) AddUser(user User) (User, error) {
 
 	err = json.Unmarshal(body, &addUser)
 	if err != nil {
-		return addUser, err
+		return addUser, errors.New(*(*string)(unsafe.Pointer(&body)))
 	}
 
 	return addUser, nil
@@ -139,7 +141,7 @@ func (s *Service) UpdateUser(userId int, user User) (User, error) {
 
 	err = json.Unmarshal(body, &updateUser)
 	if err != nil {
-		return updateUser, err
+		return updateUser, errors.New(*(*string)(unsafe.Pointer(&body)))
 	}
 
 	return updateUser, nil
@@ -170,7 +172,7 @@ func (s *Service) DeleteUser(userId int) (User, error) {
 
 	err = json.Unmarshal(body, &user)
 	if err != nil {
-		return user, err
+		return user, errors.New(*(*string)(unsafe.Pointer(&body)))
 	}
 
 	return user, nil
@@ -196,7 +198,7 @@ func (s *Service) GetOwnUser() (User, error) {
 
 	err = json.Unmarshal(body, &user)
 	if err != nil {
-		return user, err
+		return user, errors.New(*(*string)(unsafe.Pointer(&body)))
 	}
 
 	return user, nil

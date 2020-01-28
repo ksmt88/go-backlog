@@ -2,10 +2,12 @@ package backlog
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/url"
 	"strconv"
 	"time"
+	"unsafe"
 )
 
 type Space struct {
@@ -28,26 +30,30 @@ type GetRecentUpdatesQuery struct {
 	order          string
 }
 
+type Changes struct {
+	Field    string `json:"field"`
+	NewValue string `json:"new_value"`
+	OldValue string `json:"old_value"`
+	Type     string `json:"type"`
+}
+
+type Content struct {
+	ID          int    `json:"id"`
+	KeyID       int    `json:"key_id"`
+	Summary     string `json:"summary"`
+	Description string `json:"description"`
+	Comment     struct {
+		ID      int    `json:"id"`
+		Content string `json:"content"`
+	} `json:"comment"`
+	Changes []Changes `json:"changes"`
+}
+
 type RecentUpdate struct {
-	ID      int     `json:"id"`
-	Project Project `json:"project"`
-	Type    int     `json:"type"`
-	Content struct {
-		ID          int    `json:"id"`
-		KeyID       int    `json:"key_id"`
-		Summary     string `json:"summary"`
-		Description string `json:"description"`
-		Comment     struct {
-			ID      int    `json:"id"`
-			Content string `json:"content"`
-		} `json:"comment"`
-		Changes []struct {
-			Field    string `json:"field"`
-			NewValue string `json:"new_value"`
-			OldValue string `json:"old_value"`
-			Type     string `json:"type"`
-		} `json:"changes"`
-	} `json:"content"`
+	ID            int     `json:"id"`
+	Project       Project `json:"project"`
+	Type          int     `json:"type"`
+	Content       Content `json:"content"`
 	Notifications []struct {
 		ID                  int  `json:"id"`
 		AlreadyRead         bool `json:"alreadyRead"`
@@ -84,7 +90,7 @@ func (s *Service) GetSpace() (Space, error) {
 
 	err = json.Unmarshal(body, &space)
 	if err != nil {
-		return space, err
+		return space, errors.New(*(*string)(unsafe.Pointer(&body)))
 	}
 
 	return space, nil
@@ -116,7 +122,7 @@ func (s *Service) GetRecentUpdates(query GetRecentUpdatesQuery) ([]RecentUpdate,
 	var recentUpdates []RecentUpdate
 	err = json.Unmarshal(body, &recentUpdates)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(*(*string)(unsafe.Pointer(&body)))
 	}
 
 	return recentUpdates, nil
@@ -144,7 +150,7 @@ func (s *Service) GetSpaceNotification() (SpaceNotification, error) {
 
 	err = json.Unmarshal(body, &spaceNotification)
 	if err != nil {
-		return spaceNotification, err
+		return spaceNotification, errors.New(*(*string)(unsafe.Pointer(&body)))
 	}
 
 	return spaceNotification, nil

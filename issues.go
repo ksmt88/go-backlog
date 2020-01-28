@@ -2,10 +2,12 @@ package backlog
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/url"
 	"strconv"
 	"time"
+	"unsafe"
 )
 
 type GetIssueListQuery struct {
@@ -159,7 +161,9 @@ func (s *Service) GetIssueList(query GetIssueListQuery) ([]Issue, error) {
 	urlParams.Add("sort", query.Sort)
 	urlParams.Add("order", query.Order)
 	urlParams.Add("offset", strconv.Itoa(query.Offset))
-	urlParams.Add("count", strconv.Itoa(query.Count))
+	if query.Count != 0 {
+		urlParams.Add("count", strconv.Itoa(query.Count))
+	}
 	urlParams.Add("createdSince", query.CreatedSince)
 	urlParams.Add("createdUntil", query.CreatedUntil)
 	urlParams.Add("updatedSince", query.UpdatedSince)
@@ -190,8 +194,123 @@ func (s *Service) GetIssueList(query GetIssueListQuery) ([]Issue, error) {
 	var issues []Issue
 	err = json.Unmarshal(body, &issues)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(*(*string)(unsafe.Pointer(&body)))
 	}
 
 	return issues, nil
+}
+
+func (s *Service) CountIssue(query GetIssueListQuery) (int, error) {
+	requestUrl := s.BaseUrl + "/api/v2/issues/count"
+	urlParams := url.Values{}
+	urlParams.Add("apiKey", s.Config.ApiKey)
+	for _, projectId := range query.ProjectId {
+		urlParams.Add("projectId[]", strconv.Itoa(projectId))
+	}
+	for _, issueTypeId := range query.IssueTypeId {
+		urlParams.Add("issueTypeId[]", strconv.Itoa(issueTypeId))
+	}
+	for _, categoryId := range query.CategoryId {
+		urlParams.Add("categoryId[]", strconv.Itoa(categoryId))
+	}
+	for _, versionId := range query.VersionId {
+		urlParams.Add("versionId[]", strconv.Itoa(versionId))
+	}
+	for _, milestoneId := range query.MilestoneId {
+		urlParams.Add("milestoneId[]", strconv.Itoa(milestoneId))
+	}
+	for _, statusId := range query.StatusId {
+		urlParams.Add("statusId[]", strconv.Itoa(statusId))
+	}
+	for _, priorityId := range query.PriorityId {
+		urlParams.Add("priorityId[]", strconv.Itoa(priorityId))
+	}
+	for _, assigneeId := range query.AssigneeId {
+		urlParams.Add("assigneeId[]", strconv.Itoa(assigneeId))
+	}
+	for _, createdUserId := range query.CreatedUserId {
+		urlParams.Add("createdUserId[]", strconv.Itoa(createdUserId))
+	}
+	for _, resolutionId := range query.ResolutionId {
+		urlParams.Add("resolutionId[]", strconv.Itoa(resolutionId))
+	}
+	urlParams.Add("parentChild", strconv.Itoa(query.ParentChild))
+	if query.Attachment {
+		urlParams.Add("attachment", "true")
+	} else {
+		urlParams.Add("attachment", "false")
+	}
+	if query.SharedFile {
+		urlParams.Add("sharedFile", "true")
+	} else {
+		urlParams.Add("sharedFile", "false")
+	}
+	urlParams.Add("sort", query.Sort)
+	urlParams.Add("order", query.Order)
+	urlParams.Add("offset", strconv.Itoa(query.Offset))
+	if query.Count != 0 {
+		urlParams.Add("count", strconv.Itoa(query.Count))
+	}
+	urlParams.Add("createdSince", query.CreatedSince)
+	urlParams.Add("createdUntil", query.CreatedUntil)
+	urlParams.Add("updatedSince", query.UpdatedSince)
+	urlParams.Add("updatedUntil", query.UpdatedUntil)
+	urlParams.Add("startDateSince", query.StartDateSince)
+	urlParams.Add("startDateUntil", query.StartDateUntil)
+	urlParams.Add("dueDateSince", query.DueDateSince)
+	urlParams.Add("dueDateUntil", query.DueDateUntil)
+	for _, id := range query.Id {
+		urlParams.Add("id[]", strconv.Itoa(id))
+	}
+	for _, parentIssueId := range query.ParentIssueId {
+		urlParams.Add("parentIssueId[]", strconv.Itoa(parentIssueId))
+	}
+	urlParams.Add("keyword", query.Keyword)
+
+	res, err := s.client.Get(requestUrl + "?" + urlParams.Encode())
+	if err != nil {
+		return 0, err
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return 0, err
+	}
+
+	var count struct {
+		Count int
+	}
+	err = json.Unmarshal(body, &count)
+	if err != nil {
+		return 0, errors.New(*(*string)(unsafe.Pointer(&body)))
+	}
+
+	return count.Count, nil
+}
+
+func (s *Service) GetIssue(issueIdOrKey string) (Issue, error) {
+	requestUrl := s.BaseUrl + "/api/v2/issues/" + issueIdOrKey
+	urlParams := url.Values{}
+	urlParams.Add("apiKey", s.Config.ApiKey)
+
+	var issue Issue
+
+	res, err := s.client.Get(requestUrl + "?" + urlParams.Encode())
+	if err != nil {
+		return issue, err
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return issue, err
+	}
+
+	err = json.Unmarshal(body, &issue)
+	if err != nil {
+		return issue, errors.New(*(*string)(unsafe.Pointer(&body)))
+	}
+
+	return issue, nil
 }

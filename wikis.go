@@ -2,6 +2,7 @@ package backlog
 
 import (
 	"encoding/json"
+	"errors"
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
@@ -11,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unsafe"
 )
 
 type GetWikiPageListQuery struct {
@@ -70,7 +72,7 @@ type DetailWiki struct {
 	ProjectID   int           `json:"projectId"`
 	Name        string        `json:"name"`
 	Content     string        `json:"content"`
-	Tags        []Tag           `json:"tags"`
+	Tags        []Tag         `json:"tags"`
 	Attachments []Attachment  `json:"attachments"`
 	SharedFiles []SharedFile  `json:"sharedFiles"`
 	Stars       []interface{} `json:"stars"`
@@ -102,7 +104,7 @@ func (s *Service) GetWikiPageList(query GetWikiPageListQuery) ([]WikiListItem, e
 	var wikiListItems []WikiListItem
 	err = json.Unmarshal(body, &wikiListItems)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(*(*string)(unsafe.Pointer(&body)))
 	}
 
 	return wikiListItems, nil
@@ -131,7 +133,7 @@ func (s *Service) CountWikiPage(query WikiPageQuery) (int, error) {
 	}
 	err = json.Unmarshal(body, &count)
 	if err != nil {
-		return 0, err
+		return 0, errors.New(*(*string)(unsafe.Pointer(&body)))
 	}
 
 	return count.Count, nil
@@ -158,7 +160,7 @@ func (s *Service) GetWikiPageTagList(query WikiPageQuery) ([]Tag, error) {
 	var tags []Tag
 	err = json.Unmarshal(body, &tags)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(*(*string)(unsafe.Pointer(&body)))
 	}
 
 	return tags, nil
@@ -194,7 +196,7 @@ func (s *Service) AddWikiPage(wiki Wiki) (DetailWiki, error) {
 
 	err = json.Unmarshal(body, &addWiki)
 	if err != nil {
-		return addWiki, err
+		return addWiki, errors.New(*(*string)(unsafe.Pointer(&body)))
 	}
 
 	return addWiki, nil
@@ -220,7 +222,7 @@ func (s *Service) GetWikiPage(wikiId int) (DetailWiki, error) {
 
 	err = json.Unmarshal(body, &wiki)
 	if err != nil {
-		return wiki, err
+		return wiki, errors.New(*(*string)(unsafe.Pointer(&body)))
 	}
 
 	return wiki, nil
@@ -261,7 +263,7 @@ func (s *Service) UpdateWikiPage(wikiId int, wiki Wiki) (DetailWiki, error) {
 
 	err = json.Unmarshal(body, &detailWiki)
 	if err != nil {
-		return detailWiki, err
+		return detailWiki, errors.New(*(*string)(unsafe.Pointer(&body)))
 	}
 
 	return detailWiki, nil
@@ -292,7 +294,7 @@ func (s *Service) DeleteWikiPage(wikiId int) (DetailWiki, error) {
 
 	err = json.Unmarshal(body, &wiki)
 	if err != nil {
-		return wiki, err
+		return wiki, errors.New(*(*string)(unsafe.Pointer(&body)))
 	}
 
 	return wiki, nil

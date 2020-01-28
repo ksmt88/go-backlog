@@ -2,8 +2,10 @@ package backlog
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/url"
+	"unsafe"
 )
 
 type Project struct {
@@ -37,7 +39,7 @@ func (s *Service) GetProjectList() ([]Project, error) {
 	var projects []Project
 	err = json.Unmarshal(body, &projects)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(*(*string)(unsafe.Pointer(&body)))
 	}
 
 	return projects, nil
